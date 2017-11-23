@@ -28,7 +28,8 @@ data Type = TBool
           | TInt
           | TString
           | TUnit
-          | TRecord [Maybe Type]
+          | TRecord [(Label, Type)]
+          | TTuple [Maybe Type]
           | TArrow Type Type
      deriving(Eq, Show)
 
@@ -128,7 +129,7 @@ gamma |- (Let v e1 e2)      = gamma          |- e1 >>= \t1 ->
                               ((v,t1):gamma) |- e2 >>= \t2 ->
                               Just t2
 
-gamma |- (Record items)     = let res = map (\(l,t) -> gamma |- t) items
+gamma |- (Record items)     = let res = map(\(l,t) -> (l,sure(gamma |- t))) items
                               in Just (TRecord res)
 
 gamma |- (Lambda (x, t1) t) = ((x,t1):gamma) |- t >>= \t2 -> return (TArrow t1 t2)
